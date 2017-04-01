@@ -4,79 +4,76 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 	public TileController tileControl;
-	private LinkedList<Tile> btiles;
+	private List<Tile> tileset;
 	private Tile pos;
 	private Tile laspos;
 	private bool teleport;
+	private bool l;
 	// Use this for initialization
 	void Start () {
-		btiles = tileControl.tiles;
 		teleport = false;
-		pos = new Tile("T1");
-		laspos = new Tile("T1");
+		l = true;
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+		tileset = (List<Tile>) tileControl.tiles;
+		if (Input.GetKeyDown (KeyCode.X))
+			initPlayer();
+		if (Input.GetKeyDown (KeyCode.C))
+			movePlayer (1);
+		if (Input.GetKeyDown (KeyCode.J)) {
+			l = true;
+			Debug.Log ("left selected");
+		}
+		if (Input.GetKeyDown (KeyCode.K)) {
+			l = false;
+			Debug.Log ("right selected");
+		}
+	}
+
+	void initPlayer() {
+		pos = new Tile (tileset[0]);
+		laspos = new Tile (tileset [tileset.Count - 1]);
+		Debug.Log ("player initialized");
 	}
 
 	void teleportPlayer (string tile) {
-		
+
 	}
 
 	void movePlayer (int steps) {
-		bool dir = false;
-		LinkedListNode<Tile> curTile = btiles.Find (pos);
-		if (pos.tileID == laspos.tileID || teleport) {
-			dir = chooseDirection (curTile);
-			steps--;
-		} else {
-			if (Equals(curTile.Previous.Value,laspos))
-				dir = true;
-			else
-				dir = false;
-		}
-		GameObject nextTileObj;
 		int i = 1;
-		while (i <= steps) {
-			if (curTile.Value.intersection)
-				dir = chooseDirection (curTile);
-			else {
-				laspos = curTile.Value;
-				if (dir)
-					curTile = curTile.Next;
-				else
-					curTile = curTile.Previous;
-				pos = curTile.Value;
-				nextTileObj = GameObject.Find (curTile.Value.tileID);
-				this.transform.position = nextTileObj.transform.position;
+		GameObject nextTileObj;
+		while (i <= steps) { //loop as much as number of steps
+			Debug.Log ("start " + pos.tileID);
+			List<string> ncopy = new List<string> (pos.neighbor); //copy neighbor from current tile
+			ncopy.Remove (laspos.tileID); //remove previous tile from list
+			if (ncopy.Count > 1) { //if list has > 1 element, it's an intersection
+				chooseDirection(ncopy);
+			} else { //list has 1 element; move player to next tile
+				laspos = pos;
+				pos = tileset.Find (t => t.tileID == ncopy [0]);
 			}
+			Debug.Log ("end " + pos.tileID);
+			nextTileObj = GameObject.Find (pos.tileID);
+			this.transform.position = nextTileObj.transform.position;
+			this.transform.Translate (0, 5f, 0);
 			i++;
 		}
+		Debug.Log ("movement done");
 	}
 
-	bool chooseDirection(LinkedListNode<Tile> current) {
-		bool direction = false;
-		List<string> choice = current.Value.branch;
-		laspos = current.Value;
-		//show option to player
-		if (Input.GetKeyDown ("j")) {
-			foreach (Tile t in btiles) {
-				if (t.tileID == choice [0]) {
-					current = btiles.Find (t);
-					direction = false;
-				}
-			}
-		} else if (Input.GetKeyDown ("k")) {
-			foreach (Tile t in btiles) {
-				if (t.tileID == choice [1]) {
-					current = btiles.Find (t);
-					direction = true;
-				}
-			}
+	void chooseDirection(List<string> branch) {
+		Debug.Log ("count: " + branch.Count);
+		if (l) {
+			Debug.Log ("forward");
+			laspos = pos;
+			pos = tileset.Find (t => t.tileID == branch [0]);
+		} else {
+			Debug.Log ("shortcut");
+			laspos = pos;
+			pos = tileset.Find (t => t.tileID == branch [1]);
 		}
-		pos = current.Value;
-		return direction;
 	}
 }

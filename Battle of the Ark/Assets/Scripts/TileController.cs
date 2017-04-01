@@ -4,48 +4,57 @@ using UnityEngine;
 
 public struct Tile {
 	public string tileID;
-	public bool intersection;
-	public List<string> branch;
+	public List<string> neighbor;
 
-	public Tile(string ID) {
+	//tile constructor
+	public Tile(string ID, string n1, string n2) {
 		tileID = ID;
-		intersection = false;
-		branch = null;
+		List<string> nlist = new List<string> ();
+		nlist.Add (n1);
+		nlist.Add (n2);
+		neighbor = nlist;
 	}
 
-	public Tile(string ID, List<string> branchlist) {
+	//intersection tile constructor
+	public Tile(string ID, string n1, string n2, string n3) {
 		tileID = ID;
-		intersection = true;
-		branch = branchlist;
+		List<string> nlist = new List<string> ();
+		nlist.Add (n1);
+		nlist.Add (n2);
+		nlist.Add (n3);
+		neighbor = nlist;
 	}
 
-	public bool Equals(Tile t1, Tile t2) {
-		if (t1.tileID == t2.tileID) {
-			if (t1.intersection == t2.intersection)
-				return true;
-			else
-				return false;
-		} else
-			return false;
+	//copy contstructor
+	public Tile(Tile t) {
+		tileID = t.tileID;
+		neighbor = t.neighbor;
 	}
 }
 
 public class TileController : MonoBehaviour {
-	public LinkedList<Tile> tiles;
+	public List<Tile> tiles;
 	// Use this for initialization
 	void Start () {
-		Tile t1 = new Tile ("T1");
-		Tile t2 = new Tile ("T2");
-		Tile t3 = new Tile ("T3");
-		Tile t4 = new Tile ("T4");
-		tiles.AddLast (t1);
-		tiles.AddLast (t2);
-		tiles.AddLast (t3);
-		tiles.AddLast (t4);
+		tiles = new List<Tile> ();
+		/*
+		tiles.Add (new Tile ("T1","T2","T4"));
+		tiles.Add (new Tile ("T2","T3","T1"));
+		tiles.Add (new Tile ("T3","T4","T2"));
+		tiles.Add (new Tile ("T4","T1","T3"));
+		*/
+		tiles.Add (new Tile ("T1","T2","T6"));
+		tiles.Add (new Tile ("T2","T3","T1","T5"));
+		tiles.Add (new Tile ("T3","T4","T2"));
+		tiles.Add (new Tile ("T4","T5","T3"));
+		tiles.Add (new Tile ("T5","T6","T4","T2"));
+		tiles.Add (new Tile ("T6","T1","T5"));
+
+		Debug.Log ("tile initialized");
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
 }
